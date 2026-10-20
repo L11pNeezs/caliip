@@ -1,0 +1,31 @@
+
+import Dexie, { type EntityTable } from 'dexie'
+
+export interface Meal {
+  id?: number
+  date: string // YYYY-MM-DD
+  name: string
+  source: 'manual' | 'ai'
+  createdAt: string // ISO 8601
+}
+
+export interface FoodEntry {
+  id?: number
+  mealId: number
+  name: string
+  quantityGrams: number
+  caloriesPer100g: number
+  proteinPer100g: number
+  carbsPer100g: number
+  fatPer100g: number
+}
+
+export const db = new Dexie('CaliipDB') as Dexie & {
+  meals: EntityTable<Meal, 'id'>
+  foodEntries: EntityTable<FoodEntry, 'id'>
+}
+
+db.version(1).stores({
+  meals: '++id, date',
+  foodEntries: '++id, mealId'
+})

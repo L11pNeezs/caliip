@@ -1,0 +1,14 @@
+{
+  "name": "caliip",
+  "private": true,
+  "workspaces": ["apps/*"],
+  "engines": { "bun": ">=1.3.0" },
+  "scripts": {
+    "dev": "bun run --parallel --filter '@caliip/*' dev",
+    "dev:web": "bun run --filter @caliip/web dev",
+    "dev:api": "bun run --filter @caliip/api dev",
+    "check": "bun run --workspaces check",
+    "test": "bun run --filter @caliip/web test",
+    "build": "bun run --filter @caliip/web build"
+  }
+}

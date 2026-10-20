@@ -1,0 +1,29 @@
+CALIIP — INITIAL PROJECT SETUP
+
+Caliip is a calorie-tracking Progressive Web App (PWA), developed within an 80-hour project.
+
+For now, ONLY initialize the project. Do not implement application features.
+
+SETUP REQUIREMENTS
+
+- Git monorepo using Bun workspaces.
+- `apps/web`: Vue 3, TypeScript, Vite, Vuetify 3, Vue Router, Dexie.js, date-fns, vite-plugin-pwa, Vitest.
+- `apps/api`: Minimal Bun HTTP server.
+- Configure frontend-to-backend communication for local development.
+- Add `.gitignore`, `.env.example`, and a basic README.
+- Ensure both applications start successfully.
+
+CONSTRAINTS
+
+- Use Vuetify for styling, no Tailwind.
+- Use Vue composables, no Pinia.
+- Use native Fetch, no Axios.
+- Keep the setup minimal and avoid unnecessary dependencies.
+- Do not implement meal CRUD, database tables, AI recognition, or USDA integration yet.
+- Never commit API keys.
+
+Read the existing architecture, data schema, Dexie implementation, and technology decisions files before making changes.
+
+GOAL
+
+A working frontend and backend scaffold, ready for feature development.

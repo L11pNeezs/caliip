@@ -1,0 +1,63 @@
+---Project Structure---
+
+caliip/
+├── apps/
+│   ├── web/                   # Vue 3 PWA
+│   │   ├── src/
+│   │   │   ├── components/    # Reusable UI components
+│   │   │   ├── views/         # Daily, weekly, monthly views
+│   │   │   ├── db/            # Dexie / IndexedDB
+│   │   │   ├── services/
+│   │   │   │   ├── ai/        # Calls Bun API
+│   │   │   │   └── nutrition/ # USDA integration
+│   │   │   ├── composables/   # Shared Vue logic
+│   │   │   ├── types/         # TypeScript interfaces
+│   │   │   └── router/        # Vue Router
+│   │   └── package.json
+│   │
+│   └── api/                   # Bun backend
+│       ├── src/
+│       │   ├── index.ts       # HTTP server
+│       │   └── openai.ts      # OpenAI integration
+│       └── package.json
+│
+├── docs/
+│   ├── report.md
+│   ├── planning.md
+│   ├── data-schema.md
+│   └── decisions/
+│       ├── 001-database.md
+│       ├── 002-ai-provider.md
+│       └── 003-pwa.md
+│
+├── README.md
+└── package.json              # Bun workspaces
+
+---Main Data Flows---
+
+--Manual Food Entry--
+
+ - User Creates Meal
+-> Searches USDA / Enters Values Manually
+-> Selects Quantity
+-> Caliip Calculates Calories
+-> Saves To IndexedDB
+
+--AI Photo Analysis--
+
+ - User Takes Photo
+-> Vue Sends Photo to Bun API
+-> Bun API Calls OpenAI
+-> OpenAI Returns Nutrition Data
+-> Caliip Looks Up Nutritional Values In USDA
+-> User Reviews And Corrects Them
+-> Saves To IndexedDB
+
+--Daily, Weekly, And Monthly Views--
+
+ - Vue Queries IndexedDB Through Dexie
+-> TypeScript Calculates Calorie Totals
+-> Vuetify Displays Results
+(No Internet Connection Is Required For Viewing Saved Meals.)
+
+

@@ -1,0 +1,229 @@
+CALIIP — TECHNOLOGY DECISIONS
+
+PURPOSE
+
+This document records the technology choices for Caliip and the reasoning behind them.
+
+The project must remain achievable within 80 development hours.
+
+FRONTEND
+
+Vue 3 + TypeScript
+- Required technologies.
+- Vue provides reactive components and a straightforward development experience.
+- TypeScript improves type safety and maintainability.
+
+Vuetify 3
+- Required UI framework.
+- Use Vuetify components and utilities for styling.
+- Add custom CSS only when necessary.
+- Do not introduce Tailwind CSS.
+
+Vue Router
+- Provides navigation between daily, weekly, monthly, and settings views.
+- Supports browser history and meaningful URLs.
+
+Vue Composables
+- Use Vue's ref, computed, and composables for state management.
+- Do not add Pinia unless a concrete need emerges.
+
+STORAGE
+
+IndexedDB + Dexie.js
+- IndexedDB is the required local persistence mechanism.
+- Dexie simplifies database queries, schema management, and transactions.
+- Use the existing documented Meal and FoodEntry schema.
+- IndexedDB is the source of truth for meal history.
+- Do not introduce a remote meal database.
+
+DATA MODEL
+
+Meal:
+- id
+- date
+- name
+- source
+- createdAt
+
+FoodEntry:
+- id
+- mealId
+- name
+- quantityGrams
+- caloriesPer100g
+- proteinPer100g
+- carbsPer100g
+- fatPer100g
+
+A meal contains multiple food entries.
+
+Nutritional totals are calculated from food entries rather than stored redundantly.
+
+Use local calendar dates formatted as YYYY-MM-DD.
+
+PWA
+
+vite-plugin-pwa
+- Integrates PWA capabilities with Vite.
+- Generates the manifest and service worker.
+- Supports installation and offline application assets.
+- Offline functionality covers existing locally stored data, not external API calls.
+
+DATE HANDLING
+
+date-fns
+- Used for date navigation and weekly/monthly calculations.
+- Prefer explicit local calendar dates to avoid timezone-related shifts.
+
+TESTING
+
+Vitest
+- Integrates naturally with Vite.
+- Focus on calorie calculations, date aggregation, and database CRUD.
+- Use fake-indexeddb if needed for database tests.
+- Avoid extensive testing infrastructure beyond project needs.
+
+BACKEND
+
+Bun
+- Runtime for the minimal API server.
+- Use Bun's built-in HTTP server and native TypeScript support.
+- Avoid unnecessary backend frameworks.
+
+The backend exists only to protect API keys and proxy requests to external services.
+
+Planned endpoints:
+- POST /api/analyze-meal — OpenAI meal image analysis.
+- GET /api/foods/search — USDA nutritional food search.
+
+The backend must not persist meal history.
+
+Use environment variables for API keys.
+
+Never expose OpenAI or USDA API keys in frontend code.
+
+Validate uploaded images and apply reasonable request limits.
+
+AI
+
+OpenAI API
+- Used for image-based food identification and quantity estimation.
+- Return structured food names and estimated quantities in grams.
+- AI results are estimates, not guaranteed measurements.
+- Users must review and edit results before saving.
+
+Use one application-managed OpenAI API key rather than requiring users to supply their own.
+
+NUTRITION DATA
+
+USDA FoodData Central
+- Selected as the initial nutritional reference database.
+- Offers broad food coverage and a JSON REST API.
+- Use the Bun backend to protect the USDA API key.
+- Store selected nutritional values on FoodEntry records for offline access.
+
+CIQUAL was considered as an alternative:
+- Maintained by ANSES in France.
+- Reliable nutritional composition data.
+- Particularly relevant to French and European foods.
+- Downloadable dataset, but no comparable ready-to-use public search API.
+- Would require dataset conversion and normalization.
+
+USDA is the current choice because its search API is convenient and the API key is already available.
+
+VOICE INPUT
+
+Web Speech API
+- Preferred over paid transcription APIs.
+- Lower implementation complexity.
+- Browser support varies.
+- Manual input remains available as a fallback.
+
+CAMERA
+
+HTML file input
+- Use input type="file" with accept="image/*" and capture="environment".
+- Supports camera capture on compatible mobile devices and file selection.
+- Avoid implementing a custom live camera preview.
+
+HTTP REQUESTS
+
+Native Fetch API
+- Use fetch for frontend-to-backend requests and backend-to-external-service requests.
+- Do not introduce Axios.
+
+MONOREPO
+
+Bun Workspaces
+- Use a simple Git monorepo.
+- Avoid Nx and Turborepo.
+
+Expected structure:
+
+caliip/
+  apps/
+    web/
+      src/
+        components/
+        views/
+        db/
+        services/
+          ai/
+          nutrition/
+        composables/
+        types/
+        router/
+      package.json
+    api/
+      src/
+        index.ts
+        openai.ts
+      package.json
+  docs/
+    report.md
+    planning.md
+    data-schema.md
+    decisions/
+  README.md
+  package.json
+
+The exact structure can be adjusted slightly when justified.
+
+VALIDATION
+
+- Use Vuetify validation rules and TypeScript.
+- Do not add Zod unless validation requirements become significantly more complex.
+- Validate external requests on the Bun server.
+
+STATISTICS
+
+- Display numerical calorie and macronutrient totals.
+- Do not introduce Chart.js, ApexCharts, or another charting library.
+
+ARCHITECTURE
+
+Caliip uses a client-side architecture with local data persistence in IndexedDB.
+
+The Bun backend acts only as an API proxy for OpenAI and USDA.
+
+The frontend remains responsible for:
+- Meal and food management.
+- Local database operations.
+- Calorie and macronutrient calculations.
+- Daily, weekly, and monthly overviews.
+
+The backend remains responsible for:
+- Protecting external API keys.
+- Validating requests.
+- Communicating with OpenAI and USDA.
+- Returning relevant API results to the frontend.
+
+DEVELOPMENT PRINCIPLES
+
+- Keep the architecture minimal.
+- Prefer existing browser and framework capabilities.
+- Avoid unnecessary abstractions.
+- Implement manual tracking before external integrations.
+- Prioritize working functionality over optional features.
+- Follow the existing architecture, schema, and Dexie documentation.
+- Ask before introducing major architectural changes.

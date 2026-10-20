@@ -1,0 +1,49 @@
+Meal : TYPE
+- id : number (PK)
+- name : string
+- date : string (YYYY-MM-DD)
+- source : 'manual' | 'ai'
+- createdAt : string
+---
+Meal : 1->0..N : FoodEntry
+---
+FoodEntry : TYPE
+- id : number (PK)
+- mealId : number (FK -> Meal.id)
+- name : string
+- quantityGrams : number
+- caloriesPer100g : number
+- proteinPer100g : number
+- carbsPer100g : number
+- fatPer100g : number
+
+<-----------------------[not for now, do not consider]----------------------->
+( - foodCatalogId : number? (optional FK) )
+---
+FoodEntry : 1->0..N : FoodCatalog (Optional Catalog Lookup)
+---
+FoodCatalog : TYPE
+- id : number (PK)
+- name : string
+- caloriesPer100g : number
+- proteinPer100g : number
+- carbsPer100g : number
+- fatPer100g : number
+---
+<-----------------------[not for now, do not consider]----------------------->
+
+---WHY---
+
+Meal : Groups foods together, such as breakfast, lunch, or dinner.
+FoodEntry : Stores the actual quantities and nutritional values consumed.
+FoodCatalog : Stores reusable food references for faster future entry.
+
+---EXAMPLE---
+
+A lunch containing 150g of chicken and 200g of rice would be **ONE MEAL** with **TWO FoodEntry RECORDS**.
+We store nutritional values directly in each FoodEntry.
+
+---CALCULATED VALUES---
+
+Instead of storing values like "Calories", we'll instead calculate them from the food entries:
+    Calories = (quantityGrams * caloriesPer100g) / 100
