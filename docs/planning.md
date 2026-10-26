@@ -12,12 +12,15 @@ budget; detailed estimates and scheduling remain to be defined.
 - Verify that both applications start locally.
 - Establish architecture, schema, and decision documentation.
 
-## 2. Local manual tracking — planned
+## 2. Local manual tracking — CAL-3 completed
 
 - Implement the documented Dexie schema and domain interfaces.
-- Add meal and food-entry CRUD with manual nutritional input.
+- Add meal creation/listing, meal details, and food-entry addition/removal.
 - Calculate calorie and macronutrient totals from food entries.
-- Add targeted database and calculation tests, using fake-indexeddb if needed.
+- Add targeted persistence and validation tests using fake-indexeddb.
+- Verify calculations, navigation, and removal in a mobile-sized browser.
+
+Meal/food editing and meal deletion are outside CAL-3 and remain future work.
 
 ## 3. Calendar overviews — planned
 
@@ -39,5 +42,5 @@ budget; detailed estimates and scheduling remain to be defined.
 - Consider optional voice input only after core workflows are working and if
   time permits.
 
-The current implementation stops at the foundation stage. Follow the
+The current implementation covers the foundation and CAL-3. Follow the
 [technology decisions](decisions/README.md) and keep the architecture minimal.

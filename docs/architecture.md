@@ -1,7 +1,7 @@
 # Architecture
 
 Caliip is a local-first calorie-tracking PWA. Vue handles the application and
-IndexedDB will hold meal history. The Bun backend will only protect API keys,
+IndexedDB holds meal history. The Bun backend will only protect API keys,
 validate requests, and proxy OpenAI and USDA requests; it will not store meals.
 
 This document adapts the original root `architecture` and `decisions` documents.
@@ -15,13 +15,13 @@ caliip/
 │   │   ├── src/
 │   │   │   ├── components/          Reusable Vuetify components
 │   │   │   ├── views/               Routed screens
-│   │   │   ├── db/                  Future Dexie / IndexedDB setup
+│   │   │   ├── db/                  Dexie setup and persistence operations
 │   │   │   ├── services/
 │   │   │   │   ├── api.ts           Native Fetch health check
 │   │   │   │   ├── ai/              Future calls to the Bun API
 │   │   │   │   └── nutrition/       Future calls to the Bun API
 │   │   │   ├── composables/         Shared reactive Vue logic
-│   │   │   ├── types/               Future domain interfaces
+│   │   │   ├── types/               Meal and FoodEntry interfaces
 │   │   │   └── router/              Vue Router
 │   │   └── package.json
 │   └── api/
@@ -42,10 +42,14 @@ caliip/
 └── package.json                     Bun workspaces
 ```
 
-The scaffold currently contains a welcome view and a health check. Daily,
-weekly, monthly, and settings views, database initialization, and external
-integrations are future work. The original architecture's `openai.ts` module
-will be added when that integration is implemented.
+CAL-3 includes HomeView, NewMealView, MealListView, MealView, and AddFoodEntryView.
+Home links to creation and the saved-meals list. Selecting or creating a meal
+opens its detail screen, where foods can be added or removed. A successful food
+save returns to meal details. Local persistence does not depend on the backend.
+
+Daily, weekly, monthly, and settings views and external integrations are future
+work. The original architecture's `openai.ts` module will be added when that
+integration is implemented.
 
 ## Responsibilities
 
@@ -53,8 +57,8 @@ will be added when that integration is implemented.
 | --- | --- |
 | Vuetify UI and Vue Router navigation | Keep external API keys server-side |
 | Shared state through Vue composables | Validate external requests and uploads |
-| Future local meal and food management | Apply reasonable request limits |
-| Future calorie and macronutrient calculations | Proxy future OpenAI and USDA requests |
+| Local meal creation/listing and food addition/removal | Apply reasonable request limits |
+| Calculated meal calories and macronutrients | Proxy future OpenAI and USDA requests |
 | Future daily, weekly, and monthly overviews | Return results without storing meal history |
 
 Use native Fetch for HTTP requests on both sides. During development, Vite
@@ -63,7 +67,8 @@ provide an `index.html` fallback for browser-history navigation.
 
 ## Planned data flows
 
-These describe future features, not implemented scaffold functionality.
+Manual nutritional entry and meal totals are implemented. USDA lookup, AI
+analysis, and calendar overviews below remain planned.
 
 ### Manual food entry
 

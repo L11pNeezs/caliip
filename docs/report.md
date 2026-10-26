@@ -1,6 +1,6 @@
 # Project report
 
-**Status:** Initial outline, covering the scaffold stage only. Expand this report
+**Status:** Initial report covering the scaffold and CAL-3. Expand this report
 as features are implemented and evaluated.
 
 ## Objective
@@ -26,9 +26,21 @@ endpoint, and Vite API proxy responded successfully.
 
 Reproduction commands are in the [README](../README.md).
 
+## CAL-3: Manual food entry
+
+- Added local meal creation, a saved-meals list, and individual meal details.
+- Added manual food forms for quantity and calories/protein/carbs/fat per 100 g.
+- Added food removal, computed nutritional totals, and persistence across reloads.
+- Retained empty meals and rejected insertion into missing meals.
+- Used the documented version-1 schema, with explicit numeric key types.
+
+Validation includes 22 fake-indexeddb tests plus the two existing API-client
+tests. A mobile-sized Chromium smoke check exercised creation, list navigation,
+validation, zero macros, calculated totals, reload persistence, removal, empty
+meal retention, missing-meal handling, and operation with an unavailable backend.
+
 ## Remaining report sections
 
-- Manual tracking implementation and local persistence.
 - Calendar views and nutritional calculations.
 - External integrations and user review of AI estimates.
 - Offline behavior and targeted verification results.

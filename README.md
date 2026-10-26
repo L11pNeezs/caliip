@@ -1,10 +1,24 @@
 # Caliip
 
-A minimal Bun workspaces scaffold for a local-first calorie-tracking PWA.
+A Bun workspaces monorepo for a local-first calorie-tracking PWA.
 
 ## Requirements
 
 - [Bun](https://bun.sh) 1.3 or later.
+
+Run this command to install bun:
+
+### macOS & Linux
+
+```sh
+curl -fsSL https://bun.sh/install | bash
+```
+
+### macOS & Linux
+
+```sh
+powershell -c "irm bun.sh/install.ps1|iex"
+```
 
 ## Setup and development
 
@@ -67,11 +81,11 @@ apps/
   web/
     src/
       components/          Reusable Vuetify UI
-      views/               Router views (welcome scaffold only)
+      views/               Home, meal list, meal details, and entry forms
       composables/         Shared reactive Vue logic
       router/              Vue Router with browser history
-      db/                  Reserved for documented Dexie setup
-      types/               Reserved for domain interfaces
+      db/                  Dexie schema and meal/food persistence operations
+      types/               Meal and FoodEntry interfaces
       services/
         api.ts             Native Fetch API health check
         ai/                Reserved for future backend calls
@@ -103,17 +117,40 @@ Project documentation is available under [`docs/`](docs/architecture.md):
 - [Data schema](docs/data-schema.md) and [Dexie reference](docs/dexie-schema.md).
 - [Development plan](docs/planning.md): initial outline for subsequent stages.
 - [Project report](docs/report.md): scaffold summary and an outline to expand.
+- [Test reference](docs/testing.md): test scenarios, run commands, troubleshooting, and a template for future suites.
 
 The original source documents remain preserved in the project root:
 `architecture`, `data schema`, `dexie.js implementation of data schema`,
 `decisions`, and `requirements`.
 
-This stage only scaffolds the project. Following `requirements`, it does not
-create database tables or implement meal CRUD, nutrition calculations, AI, or
-USDA integration. Dexie and date-fns are installed for later implementation.
-The documented database will use `CaliipDB`, a `meals` table indexed by `++id, date`,
-and a `foodEntries` table indexed by `++id, mealId`. Local calendar dates use
-`YYYY-MM-DD`; nutritional totals will be calculated from food entries.
+### CAL-3: Manual food entry
+
+1. From Home, choose **Create meal**, enter a name and date, and save.
+2. The meal detail screen shows the saved meal and its food entries.
+3. Choose **Add food** and enter a name, positive quantity in grams, and
+   calories/protein/carbohydrates/fat per 100 g. Zero nutrition values are valid;
+   blank, negative, or non-finite values are not.
+4. Saving returns to the meal and updates its calculated nutritional totals.
+5. Choose **Remove** beside an entry to delete it. Removing the final food keeps
+   the empty meal, which can receive new entries later.
+6. Use **View meals** on Home to reopen meals, newest meal dates first.
+
+Meals and food entries persist in this browser's `CaliipDB`: `meals` is indexed
+by `++id, date` and `foodEntries` by `++id, mealId`. Dates use local `YYYY-MM-DD`
+values. Totals are calculated, not stored. Manual tracking works with just the
+frontend running; the backend health status does not block it. Clearing browser
+site data removes the local history, and different origins have separate data.
+
+The original root `requirements` describes the earlier scaffold milestone.
+CAL-3 adds meal creation/listing and food addition/removal. Editing, meal deletion,
+calendar overviews, micronutrients, AI, and USDA integration remain future work.
+
+The route flow is `/` → `/meals` → `/meals/:mealId`, with `/meals/new` for meal
+creation and `/meals/:mealId/foods/new` for food entry. Invalid or missing meals
+show an error and do not allow food insertion.
+
+`bun run test` includes fake-indexeddb coverage for generated keys, persistence
+after reopening, date ordering, validation, meal relationships, and deletion.
 
 The backend will eventually proxy `POST /api/analyze-meal` and
 `GET /api/foods/search`, protecting API keys without persisting meal history.
