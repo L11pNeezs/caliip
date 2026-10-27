@@ -28,8 +28,8 @@ capabilities before adding abstractions.
 | Validation | Vuetify rules and TypeScript, plus server-side request validation | Keep validation simple; no current need for Zod |
 | Statistics | Numerical calorie and macronutrient totals | Avoid an unnecessary charting dependency |
 
-Dexie and date-fns are installed but not yet used for domain features. Future
-database tests may use fake-indexeddb when needed.
+CAL-3 uses Dexie for local meal/food persistence and date-fns for local dates.
+Database tests use fake-indexeddb without requiring a browser or backend.
 
 ## Future input and integration choices
 

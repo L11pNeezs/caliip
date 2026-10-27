@@ -1,6 +1,6 @@
 # 001: IndexedDB with Dexie
 
-**Status:** Accepted; database initialization is deferred beyond the scaffold.
+**Status:** Accepted; version-1 database implemented for CAL-3.
 
 ## Context
 
@@ -16,6 +16,11 @@ IndexedDB is the source of truth; the Bun backend does not persist meals.
 A meal groups multiple food entries. Each entry stores its quantity and
 nutritional values per 100 grams. Calculate totals rather than storing them
 redundantly, and group meals by local `YYYY-MM-DD` dates.
+
+Use `Table<Entity, number>` for explicit numeric primary-key typing with optional
+entity IDs. Validate food values and check the meal exists inside a read-write
+transaction before insertion. Creating a meal is a separate action; empty meals
+are valid, including after removing their final food entry.
 
 ## Consequences
 

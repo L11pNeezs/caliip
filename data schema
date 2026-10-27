@@ -17,7 +17,7 @@ FoodEntry : TYPE
 - carbsPer100g : number
 - fatPer100g : number
 
-<-----------------------[not for now, do not consider]----------------------->
+<-----------------------[not for now, do not consider, ignore this]----------------------->
 ( - foodCatalogId : number? (optional FK) )
 ---
 FoodEntry : 1->0..N : FoodCatalog (Optional Catalog Lookup)
@@ -30,7 +30,7 @@ FoodCatalog : TYPE
 - carbsPer100g : number
 - fatPer100g : number
 ---
-<-----------------------[not for now, do not consider]----------------------->
+<-----------------------[not for now, do not consider, ignore this]----------------------->
 
 ---WHY---
 

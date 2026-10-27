@@ -1,8 +1,8 @@
 # Data schema
 
-This is the planned model from the original root `data schema` and
-`dexie.js implementation of data schema` documents. Database tables are not
-initialized by the current scaffold.
+This model follows the original root `data schema` and
+`dexie.js implementation of data schema` documents. CAL-3 initializes the
+version-1 tables in `apps/web/src/db/index.ts`.
 
 ## Meal
 
@@ -33,8 +33,9 @@ Stores the quantity consumed and nutritional values per 100 grams.
 
 One meal has zero or more food entries; each food entry belongs to one meal.
 For example, lunch with 150 g of chicken and 200 g of rice is one `Meal` with
-two `FoodEntry` records. IndexedDB does not enforce foreign keys; future CRUD
-logic must maintain this relationship.
+two `FoodEntry` records. IndexedDB does not enforce foreign keys. Food insertion
+checks that the meal exists inside a transaction before saving the entry.
+Removing the final food entry keeps its meal.
 
 ## Calculated values
 
