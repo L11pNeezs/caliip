@@ -19,9 +19,10 @@ export const router = createRouter({
       component: MealListView,
     },
     {
-      path: '/meals/new',
+      path: '/meals/new/:mode(manual|camera|voice)',
       name: 'new-meal',
       component: NewMealView,
+      props: true,
     },
     {
       path: '/meals/:mealId',

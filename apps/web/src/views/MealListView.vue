@@ -27,7 +27,7 @@ onMounted(loadMeals)
     <v-card-title class="text-h4">Your meals</v-card-title>
     <v-card-text>
       <div class="d-flex flex-wrap ga-3 mb-6">
-        <v-btn :to="{ name: 'new-meal' }" color="primary">Create meal</v-btn>
+        <v-btn :to="{ name: 'new-meal', params: { mode: 'manual' }}" color="primary">Add meal</v-btn>
         <v-btn :to="{ name: 'home' }" variant="text">Home</v-btn>
       </div>
       <p v-if="loading" role="status">Loading meals…</p>
@@ -35,7 +35,7 @@ onMounted(loadMeals)
         {{ error }}
         <v-btn variant="text" @click="loadMeals">Retry</v-btn>
       </v-alert>
-      <p v-else-if="meals.length === 0">No meals yet. Create your first meal to get started.</p>
+      <p v-else-if="meals.length === 0">No meals yet. Add your first meal to get started.</p>
       <template v-else>
         <v-card v-for="meal in meals" :key="meal.id" variant="outlined" class="mb-3">
           <v-card-title class="text-wrap">{{ meal.name }}</v-card-title>
