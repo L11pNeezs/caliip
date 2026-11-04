@@ -15,8 +15,12 @@ export async function addMeal(meal: Meal): Promise<number> {
     return id
 }
 
-export async function getMeals(): Promise<Meal[]> {
-    return db.meals.orderBy('date').reverse().toArray()
+export async function getMealsForDate(date?: string): Promise<Meal[]> {
+    if (!date) {
+        return db.meals.orderBy('date').reverse().toArray()
+    }
+
+    return db.meals.where('date').equals(date).toArray()
 }
 
 export async function getMeal(mealId: number): Promise<Meal | undefined> {
