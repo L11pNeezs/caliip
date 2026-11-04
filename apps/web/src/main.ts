@@ -16,6 +16,7 @@ import {
     VMenu,
     VList,
     VListItem,
+    VDatePicker,
 } from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import 'vuetify/styles'
@@ -23,7 +24,7 @@ import App from './App.vue'
 import { router } from './router'
 
 const vuetify = createVuetify({
-  components: { VApp, VAppBar, VCard, VCardText, VCardTitle, VChip, VContainer, VMain, VForm, VTextField, VAlert, VBtn, VMenu, VList, VListItem, },
+  components: { VApp, VAppBar, VCard, VCardText, VCardTitle, VChip, VContainer, VMain, VForm, VTextField, VAlert, VBtn, VMenu, VList, VListItem, VDatePicker, },
   directives,
   theme: {
     defaultTheme: 'light',
