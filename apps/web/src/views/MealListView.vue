@@ -1,23 +1,75 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { getMeals } from '../db/meals'
+import { watch, onMounted, ref } from 'vue'
+import { getMealsForDate } from '../db/meals'
+import { getFoodEntriesForMeal } from '../db/foodEntries'
 import type { Meal } from '../types/meal'
 
 const meals = ref<Meal[]>([])
+const dailyTotals = ref({ calories: 0, protein: 0, carbs: 0, fat: 0 })
 const loading = ref(true)
 const error = ref('')
+
+const date = ref(new Date())
+const draftDate = ref<Date | null>(null)
+const calendarOpen = ref(false)
+
+const calendarIcons = {
+  previous: ['M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z'],
+  next: ['M8.59 16.59 10 18l6-6-6-6-1.41 1.41L13.17 12z'],
+  dropdown: ['M7 10l5 5 5-5z'],
+}
+
+function confirmDate() {
+  if (!draftDate.value) return
+
+  date.value = new Date(draftDate.value.getTime())
+  calendarOpen.value = false
+}
+
+function changeDay(offset: number) {
+  const nextDate = new Date(date.value.getTime())
+  nextDate.setDate(nextDate.getDate() + offset)
+  date.value = nextDate
+}
+
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
 
 async function loadMeals() {
   loading.value = true
   error.value = ''
   try {
-    meals.value = await getMeals()
+    const dayMeals = await getMealsForDate(formatLocalDate(date.value))
+    const entriesByMeal = await Promise.all(dayMeals.map(meal =>
+      meal.id !== undefined ? getFoodEntriesForMeal(meal.id) : Promise.resolve([]),
+    ))
+    const totals = entriesByMeal.flat().reduce((total, entry) => {
+      const factor = entry.quantityGrams / 100
+      total.calories += factor * entry.caloriesPer100g
+      total.protein += factor * entry.proteinPer100g
+      total.carbs += factor * entry.carbsPer100g
+      total.fat += factor * entry.fatPer100g
+      return total
+    }, { calories: 0, protein: 0, carbs: 0, fat: 0 })
+
+    meals.value = dayMeals
+    dailyTotals.value = totals
   } catch {
     error.value = 'Could not load your meals. Please try again.'
   } finally {
     loading.value = false
   }
 }
+
+watch(date, loadMeals)
+watch(calendarOpen, (open) => {
+  if (open) draftDate.value = new Date(date.value.getTime())
+})
 
 onMounted(loadMeals)
 </script>
@@ -26,21 +78,73 @@ onMounted(loadMeals)
   <v-card class="mx-auto pa-6" max-width="800" variant="outlined">
     <v-card-title class="text-h4">Your meals</v-card-title>
     <v-card-text>
+      <div class="d-flex align-center justify-center ga-3 mb-6">
+        <v-btn variant="text" aria-label="Previous day" :disabled="loading" @click="changeDay(-1)">
+          ←
+        </v-btn>
+        <v-menu
+          v-model="calendarOpen"
+          :close-on-content-click="false"
+          location="bottom center"
+          origin="top center"
+        >
+          <template #activator="{ props }">
+            <v-btn v-bind="props" variant="text" aria-label="Pick a date">
+              <span aria-live="polite">
+                {{ date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) }}
+              </span>
+            </v-btn>
+          </template>
+
+          <v-card>
+            <v-date-picker
+              v-model="draftDate"
+              title="Filter meals by date"
+              :prev-icon="calendarIcons.previous"
+              :next-icon="calendarIcons.next"
+              :mode-icon="calendarIcons.dropdown"
+              hide-header
+            />
+            <v-card-text class="d-flex justify-space-evenly ga-2">
+              <v-btn variant="text" @click="calendarOpen = false">Cancel</v-btn>
+              <v-btn color="primary" :disabled="!draftDate" @click="confirmDate">
+                {{ draftDate ? `Show ${formatLocalDate(draftDate)}` : 'Select a date' }}
+              </v-btn>
+            </v-card-text>
+          </v-card>
+        </v-menu>
+        <v-btn variant="text" aria-label="Next day" :disabled="loading" @click="changeDay(1)">
+          →
+        </v-btn>
+      </div>
+      <div v-if="!loading && !error" class="text-center mb-6" aria-live="polite">
+        <p class="text-h6">Daily total: {{ dailyTotals.calories.toFixed(1) }} kcal</p>
+        <p class="text-body-2 text-medium-emphasis">
+          Protein {{ dailyTotals.protein.toFixed(1) }} g ·
+          Carbs {{ dailyTotals.carbs.toFixed(1) }} g ·
+          Fat {{ dailyTotals.fat.toFixed(1) }} g
+        </p>
+      </div>
       <div class="d-flex flex-wrap ga-3 mb-6">
         <v-btn :to="{ name: 'new-meal', params: { mode: 'manual' }}" color="primary">Add meal</v-btn>
         <v-btn :to="{ name: 'home' }" variant="text">Home</v-btn>
       </div>
+
       <p v-if="loading" role="status">Loading meals…</p>
+
       <v-alert v-else-if="error" type="error">
         {{ error }}
         <v-btn variant="text" @click="loadMeals">Retry</v-btn>
       </v-alert>
-      <p v-else-if="meals.length === 0">No meals yet. Add your first meal to get started.</p>
+
+      <p v-else-if="meals.length === 0">No meals for this date.</p>
       <template v-else>
         <v-card v-for="meal in meals" :key="meal.id" variant="outlined" class="mb-3">
           <v-card-title class="text-wrap">{{ meal.name }}</v-card-title>
+
           <v-card-text>
             <p class="mb-3">{{ meal.date }}</p>
+
             <v-btn :to="{ name: 'meal', params: { mealId: meal.id } }" variant="tonal">
               View meal
             </v-btn>
