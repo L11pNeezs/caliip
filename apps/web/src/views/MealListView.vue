@@ -5,7 +5,7 @@ import { getFoodEntriesForMeal } from '../db/foodEntries'
 import type { Meal } from '../types/meal'
 
 const meals = ref<Meal[]>([])
-const dailyCalories = ref(0)
+const dailyTotals = ref({ calories: 0, protein: 0, carbs: 0, fat: 0 })
 const loading = ref(true)
 const error = ref('')
 
@@ -48,12 +48,17 @@ async function loadMeals() {
     const entriesByMeal = await Promise.all(dayMeals.map(meal =>
       meal.id !== undefined ? getFoodEntriesForMeal(meal.id) : Promise.resolve([]),
     ))
-    const calories = entriesByMeal.flat().reduce((total, entry) =>
-      total + entry.quantityGrams * entry.caloriesPer100g / 100, 0,
-    )
+    const totals = entriesByMeal.flat().reduce((total, entry) => {
+      const factor = entry.quantityGrams / 100
+      total.calories += factor * entry.caloriesPer100g
+      total.protein += factor * entry.proteinPer100g
+      total.carbs += factor * entry.carbsPer100g
+      total.fat += factor * entry.fatPer100g
+      return total
+    }, { calories: 0, protein: 0, carbs: 0, fat: 0 })
 
     meals.value = dayMeals
-    dailyCalories.value = calories
+    dailyTotals.value = totals
   } catch {
     error.value = 'Could not load your meals. Please try again.'
   } finally {
@@ -112,9 +117,14 @@ onMounted(loadMeals)
           →
         </v-btn>
       </div>
-      <p v-if="!loading && !error" class="text-h6 text-center mb-6" aria-live="polite">
-        Daily total: {{ dailyCalories.toFixed(1) }} kcal
-      </p>
+      <div v-if="!loading && !error" class="text-center mb-6" aria-live="polite">
+        <p class="text-h6">Daily total: {{ dailyTotals.calories.toFixed(1) }} kcal</p>
+        <p class="text-body-2 text-medium-emphasis">
+          Protein {{ dailyTotals.protein.toFixed(1) }} g ·
+          Carbs {{ dailyTotals.carbs.toFixed(1) }} g ·
+          Fat {{ dailyTotals.fat.toFixed(1) }} g
+        </p>
+      </div>
       <div class="d-flex flex-wrap ga-3 mb-6">
         <v-btn :to="{ name: 'new-meal', params: { mode: 'manual' }}" color="primary">Add meal</v-btn>
         <v-btn :to="{ name: 'home' }" variant="text">Home</v-btn>
