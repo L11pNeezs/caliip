@@ -2,6 +2,7 @@
 import { watch, onMounted, ref } from 'vue'
 import { getMealsForDate } from '../db/meals'
 import { getFoodEntriesForMeal } from '../db/foodEntries'
+import { calculateNutritionTotals } from '../utils/nutrition'
 import type { Meal } from '../types/meal'
 
 const meals = ref<Meal[]>([])
@@ -48,14 +49,7 @@ async function loadMeals() {
     const entriesByMeal = await Promise.all(dayMeals.map(meal =>
       meal.id !== undefined ? getFoodEntriesForMeal(meal.id) : Promise.resolve([]),
     ))
-    const totals = entriesByMeal.flat().reduce((total, entry) => {
-      const factor = entry.quantityGrams / 100
-      total.calories += factor * entry.caloriesPer100g
-      total.protein += factor * entry.proteinPer100g
-      total.carbs += factor * entry.carbsPer100g
-      total.fat += factor * entry.fatPer100g
-      return total
-    }, { calories: 0, protein: 0, carbs: 0, fat: 0 })
+    const totals = calculateNutritionTotals(entriesByMeal.flat())
 
     meals.value = dayMeals
     dailyTotals.value = totals

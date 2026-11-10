@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto'
 import { afterAll, beforeEach, describe, expect, it } from 'vitest'
 import { db } from './index'
-import { addMeal, getMeal, getMeals } from './meals'
+import { addMeal, getMeal, getMealsForDate } from './meals'
 import { addFoodEntry, getFoodEntriesForMeal, removeFoodEntry } from './foodEntries'
 import type { FoodEntry } from '../types/food-entry'
 
@@ -44,10 +44,26 @@ describe('manual meal persistence', () => {
     ])
   })
 
-  it('lists meals with newest local dates first', async () => {
+  it.each([undefined, ''])('lists all meals with newest local dates first for date %j', async date => {
     const earlier = await addMeal({ ...mealInput, date: '2026-10-25' })
     const later = await addMeal(mealInput)
-    expect((await getMeals()).map(meal => meal.id)).toEqual([later, earlier])
+    expect((await getMealsForDate(date)).map(meal => meal.id)).toEqual([later, earlier])
+  })
+
+  it('returns every meal on the selected date and excludes other days', async () => {
+    await addMeal({ ...mealInput, date: '2026-10-25' })
+    const lunch = await addMeal(mealInput)
+    const dinner = await addMeal({ ...mealInput, name: 'Dinner' })
+    await addMeal({ ...mealInput, date: '2026-10-27' })
+
+    const meals = await getMealsForDate('2026-10-26')
+    expect(meals.map(meal => meal.id).sort()).toEqual([lunch, dinner].sort())
+    expect(meals.every(meal => meal.date === '2026-10-26')).toBe(true)
+  })
+
+  it('returns no meals for an unused date', async () => {
+    await addMeal(mealInput)
+    expect(await getMealsForDate('2026-10-27')).toEqual([])
   })
 
   it('rejects an empty meal date without inserting a meal', async () => {
